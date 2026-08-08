@@ -41,7 +41,11 @@ class YPAlbumCell: UITableViewCell {
         thumbnail.contentMode = .scaleAspectFill
         thumbnail.clipsToBounds = true
         
+        backgroundColor = YPConfig.colors.albumCellBackgroundColor
+        contentView.backgroundColor = YPConfig.colors.albumCellBackgroundColor
         title.font = YPConfig.fonts.albumCellTitleFont
+        title.textColor = YPConfig.colors.albumCellTitleColor
         numberOfItems.font = YPConfig.fonts.albumCellNumberOfItemsFont
+        numberOfItems.textColor = YPConfig.colors.albumCellNumberOfItemsColor
     }
 }

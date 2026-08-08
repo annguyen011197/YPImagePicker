@@ -15,16 +15,33 @@ extension UINavigationBar {
         self.titleTextAttributes = [NSAttributedString.Key.font: font]
     }
 
-    func configureNavigationBar(isTransculent: Bool, tintColor: UIColor) {
+    func configureNavigationBar(
+        isTranslucent: Bool,
+        backgroundColor: UIColor,
+        tintColor: UIColor,
+        titleColor: UIColor,
+        titleFont: UIFont? = nil
+    ) {
         self.tintColor = tintColor
 
-        let appearance = standardAppearance
-        if isTransculent {
+        let appearance = UINavigationBarAppearance()
+        if isTranslucent {
             appearance.configureWithTransparentBackground()
         } else {
             appearance.configureWithOpaqueBackground()
+            appearance.backgroundColor = backgroundColor
         }
-        isTranslucent = isTransculent
+
+        var titleAttributes: [NSAttributedString.Key: Any] = [.foregroundColor: titleColor]
+        if let titleFont = titleFont {
+            titleAttributes[.font] = titleFont
+        }
+        appearance.titleTextAttributes = titleAttributes
+
+        self.isTranslucent = isTranslucent
+        standardAppearance = appearance
         scrollEdgeAppearance = appearance
+        compactAppearance = appearance
+        compactScrollEdgeAppearance = appearance
     }
 }

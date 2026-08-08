@@ -83,4 +83,16 @@ public struct YPColors {
     public var albumTintColor: UIColor = .ypLabel
     /// The color of the Album's title color
     public var albumTitleColor: UIColor = .ypLabel
+
+    /// The background color of the albums screen and its table.
+    public var albumBackgroundColor: UIColor = .ypSystemBackground
+
+    /// The background color of each album row.
+    public var albumCellBackgroundColor: UIColor = .clear
+
+    /// The color of an album name.
+    public var albumCellTitleColor: UIColor = .ypLabel
+
+    /// The color of an album's item count.
+    public var albumCellNumberOfItemsColor: UIColor = .ypSecondaryLabel
 }

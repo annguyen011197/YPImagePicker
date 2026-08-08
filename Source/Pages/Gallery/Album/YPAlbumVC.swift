@@ -40,10 +40,13 @@ class YPAlbumVC: UIViewController {
                                                            target: self,
                                                            action: #selector(close))
         navigationItem.leftBarButtonItem?.setFont(font: YPConfig.fonts.leftBarButtonFont, forState: .normal)
-        navigationController?.navigationBar.titleTextAttributes = [.font: YPConfig.fonts.navigationBarTitleFont,
-                                                                   .foregroundColor: YPConfig.colors.albumTitleColor]
-        navigationController?.navigationBar.barTintColor = YPConfig.colors.albumBarTintColor
-        navigationController?.navigationBar.tintColor = YPConfig.colors.albumTintColor
+        navigationController?.navigationBar.configureNavigationBar(
+            isTranslucent: false,
+            backgroundColor: YPConfig.colors.albumBarTintColor,
+            tintColor: YPConfig.colors.albumTintColor,
+            titleColor: YPConfig.colors.albumTitleColor,
+            titleFont: YPConfig.fonts.navigationBarTitleFont
+        )
         setUpTableView()
         fetchAlbumsInBackground()
     }
@@ -72,6 +75,7 @@ class YPAlbumVC: UIViewController {
         v.tableView.rowHeight = UITableView.automaticDimension
         v.tableView.estimatedRowHeight = 80
         v.tableView.separatorStyle = .none
+        v.tableView.backgroundColor = YPConfig.colors.albumBackgroundColor
         v.tableView.register(YPAlbumCell.self, forCellReuseIdentifier: "AlbumCell")
     }
 }

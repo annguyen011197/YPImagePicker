@@ -16,7 +16,7 @@ final class YPPagerMenu: UIView {
     
     convenience init() {
         self.init(frame: .zero)
-        backgroundColor = .offWhiteOrBlack
+        backgroundColor = YPConfig.colors.safeAreaBackgroundColor
         clipsToBounds = true
     }
     

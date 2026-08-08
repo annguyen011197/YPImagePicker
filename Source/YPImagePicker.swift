@@ -9,6 +9,7 @@
 import UIKit
 import AVFoundation
 import Photos
+import SwiftUI
 
 public protocol YPImagePickerDelegate: AnyObject {
     func imagePickerHasNoItemsInLibrary(_ picker: YPImagePicker)
@@ -62,7 +63,7 @@ open class YPImagePicker: UINavigationController {
         _didFinishPicking?(items, false)
         _didFinishPicking = nil // Avoid retaining the picker via a strongly-captured closure.
     }
-    
+
     private let loadingView = YPLoadingView()
     private let picker: YPPickerVC!
 
@@ -74,8 +75,13 @@ open class YPImagePicker: UINavigationController {
         }
         viewControllers = [picker]
         setupLoadingView()
-        navigationBar.configureNavigationBar(isTransculent: false, tintColor: YPImagePickerConfiguration.shared.colors.tintColor)
-        navigationBar.titleTextAttributes = [NSAttributedString.Key.foregroundColor : YPImagePickerConfiguration.shared.colors.tintColor]
+        navigationBar.configureNavigationBar(
+            isTranslucent: false,
+            backgroundColor: YPConfig.colors.defaultNavigationBarColor,
+            tintColor: YPConfig.colors.tintColor,
+            titleColor: YPConfig.colors.tintColor,
+            titleFont: YPConfig.fonts.navigationBarTitleFont
+        )
         view.backgroundColor = YPImagePickerConfiguration.shared.colors.safeAreaBackgroundColor
 
         picker.didSelectItems = { [weak self] items in
@@ -85,7 +91,7 @@ open class YPImagePicker: UINavigationController {
             transition.timingFunction = CAMediaTimingFunction(name: CAMediaTimingFunctionName.easeInEaseOut)
             transition.type = CATransitionType.fade
             self?.view.layer.add(transition, forKey: nil)
-            
+
             // Multiple items flow
             if items.count > 1 {
                 if YPConfig.library.skipSelectionsGallery {
@@ -99,7 +105,7 @@ open class YPImagePicker: UINavigationController {
                     return
                 }
             }
-            
+
             // One item flow
             let item = items.first!
             switch item {
@@ -122,7 +128,7 @@ open class YPImagePicker: UINavigationController {
                     }
                     self?.didSelect(items: [mediaItem])
                 }
-                
+
                 func showCropVC(photo: YPMediaPhoto, completion: @escaping (_ aphoto: YPMediaPhoto) -> Void) {
                     switch YPConfig.showsCrop {
                     case .rectangle, .circle:
@@ -136,7 +142,7 @@ open class YPImagePicker: UINavigationController {
                         completion(photo)
                     }
                 }
-                
+
                 if YPConfig.showsPhotoFilters {
                     let filterVC = YPPhotoFiltersVC(inputPhoto: photo,
                                                     isFromSelectionVC: false)
@@ -164,11 +170,11 @@ open class YPImagePicker: UINavigationController {
             }
         }
     }
-    
+
     deinit {
         ypLog("Picker deinited 👍")
     }
-    
+
     private func setupLoadingView() {
         view.subviews(
             loadingView
@@ -182,9 +188,64 @@ extension YPImagePicker: YPPickerVCDelegate {
     func libraryHasNoItems() {
         self.imagePickerDelegate?.imagePickerHasNoItemsInLibrary(self)
     }
-    
+
     func shouldAddToSelection(indexPath: IndexPath, numSelections: Int) -> Bool {
         return self.imagePickerDelegate?.shouldAddToSelection(indexPath: indexPath, numSelections: numSelections)
             ?? true
+    }
+}
+
+// MARK: - SwiftUI
+
+/// A SwiftUI wrapper for presenting ``YPImagePicker``.
+///
+/// Present this view from a sheet or full-screen cover. The picker dismisses the
+/// presentation after delivering its result unless `automaticallyDismisses` is disabled.
+public struct YPImagePickerView: UIViewControllerRepresentable {
+    public typealias UIViewControllerType = YPImagePicker
+    public typealias Completion = YPImagePicker.DidFinishPickingCompletion
+
+    @Environment(\.dismiss) private var dismiss
+
+    private let configuration: YPImagePickerConfiguration
+    private let automaticallyDismisses: Bool
+    private let completion: Completion
+
+    public init(
+        configuration: YPImagePickerConfiguration = YPImagePickerConfiguration(),
+        automaticallyDismisses: Bool = true,
+        completion: @escaping Completion
+    ) {
+        self.configuration = configuration
+        self.automaticallyDismisses = automaticallyDismisses
+        self.completion = completion
+    }
+
+    public func makeUIViewController(context: Context) -> YPImagePicker {
+        let picker = YPImagePicker(configuration: configuration)
+        applyAppearance(to: picker)
+        picker.didFinishPicking { items, cancelled in
+            completion(items, cancelled)
+
+            if automaticallyDismisses {
+                dismiss()
+            }
+        }
+        return picker
+    }
+
+    public func updateUIViewController(_ uiViewController: YPImagePicker, context: Context) {
+        applyAppearance(to: uiViewController)
+    }
+
+    private func applyAppearance(to picker: YPImagePicker) {
+        picker.view.backgroundColor = configuration.colors.safeAreaBackgroundColor
+        picker.navigationBar.configureNavigationBar(
+            isTranslucent: false,
+            backgroundColor: configuration.colors.defaultNavigationBarColor,
+            tintColor: configuration.colors.tintColor,
+            titleColor: configuration.colors.tintColor,
+            titleFont: configuration.fonts.navigationBarTitleFont
+        )
     }
 }
